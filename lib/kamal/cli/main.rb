@@ -222,6 +222,34 @@ class Kamal::Cli::Main < Kamal::Cli::Base
     puts Kamal::VERSION
   end
 
+  desc "alias", "Run aliased command", hide: true
+  def alias(*args)
+    alias_name = args.pop
+    _alias = KAMAL.alias(alias_name)
+    if _alias
+      command_options = options.dup
+      command_options.delete("config_file") if command_options["config_file"] == "config/deploy.yml"
+      command_options.delete("skip_hooks") if command_options["skip_hooks"] == false
+
+      all_options = _alias.options.merge(command_options)
+      arguments = (_alias.arguments + args).map { |a| Shellwords.escape(a) }
+
+      if all_options[:verbose]
+        puts "Invoking alias '#{command}' as '#{_alias.command}' with args '#{arguments}' and options '#{all_options}'"
+      end
+
+      invoke "kamal:cli:#{_alias.invocation}", arguments, all_options
+    else
+      self.class.handle_no_command_error(command)
+    end
+  rescue RuntimeError => e
+    if e.message =~ /Missing Thor class for invoke/
+      raise "Alias '#{command}' cannot be invoked, '#{_alias.command}' not found"
+    else
+      raise
+    end
+  end
+
   desc "accessory", "Manage accessories (db/redis/search)"
   subcommand "accessory", Kamal::Cli::Accessory
 

@@ -75,7 +75,7 @@ class Kamal::Cli::App < Kamal::Cli::Base
   option :interactive, aliases: "-i", type: :boolean, default: false, desc: "Execute command over ssh for an interactive shell (use for console/bash)"
   option :reuse, type: :boolean, default: false, desc: "Reuse currently running container instead of starting a new one"
   option :env, aliases: "-e", type: :hash, desc: "Set environment variables for the command"
-  def exec(cmd)
+  def exec(*cmd)
     env = options[:env]
     case
     when options[:interactive] && options[:reuse]

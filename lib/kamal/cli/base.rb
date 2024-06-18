@@ -5,6 +5,7 @@ require "kamal/sshkit_with_ext"
 module Kamal::Cli
   class Base < Thor
     include SSHKit::DSL
+    include Aliases
 
     def self.exit_on_failure?() true end
 
