@@ -3,7 +3,7 @@ require "active_support/core_ext/module/delegation"
 
 class Kamal::Commander
   attr_accessor :verbosity, :holding_lock, :connected
-  delegate :hosts, :roles, :primary_host, :primary_role, :roles_on, :traefik_hosts, :accessory_hosts, to: :specifics
+  delegate :hosts, :roles, :primary_host, :primary_role, :roles_on, :traefik_hosts, :proxy_hosts, :proxy_host?, :accessory_hosts, to: :specifics
 
   def initialize
     self.verbosity = :info
@@ -97,6 +97,10 @@ class Kamal::Commander
     @lock ||= Kamal::Commands::Lock.new(config)
   end
 
+  def proxy
+    @proxy ||= Kamal::Commands::Proxy.new(config)
+  end
+
   def prune
     @prune ||= Kamal::Commands::Prune.new(config)
   end
@@ -111,6 +115,10 @@ class Kamal::Commander
 
   def traefik
     @traefik ||= Kamal::Commands::Traefik.new(config)
+  end
+
+  def traefik_or_proxy(host)
+    proxy_host?(host) ? proxy : traefik
   end
 
 
