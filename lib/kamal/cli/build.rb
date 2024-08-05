@@ -52,7 +52,7 @@ class Kamal::Cli::Build < Kamal::Cli::Base
       end
 
       KAMAL.with_verbosity(:debug) do
-        Dir.chdir(KAMAL.config.builder.build_directory) { execute *push }
+        Dir.chdir(KAMAL.config.builder.build_directory) { execute *push, env: KAMAL.config.builder.secrets }
       end
     end
   end

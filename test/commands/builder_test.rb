@@ -61,10 +61,13 @@ class CommandsBuilderTest < ActiveSupport::TestCase
   end
 
   test "build secrets" do
-    builder = new_builder_command(builder: { "secrets" => [ "token_a", "token_b" ] })
-    assert_equal \
-      "-t dhh/app:123 -t dhh/app:latest --label service=\"app\" --secret id=\"token_a\" --secret id=\"token_b\" --file Dockerfile",
-      builder.target.build_options.join(" ")
+    with_test_secrets("secrets" => "token_a=foo\ntoken_b=bar") do
+      FileUtils.touch("Dockerfile")
+      builder = new_builder_command(builder: { "secrets" => [ "token_a", "token_b" ] })
+      assert_equal \
+        "-t dhh/app:123 -t dhh/app:latest --label service=\"app\" --secret id=\"token_a\" --secret id=\"token_b\" --file Dockerfile",
+        builder.target.build_options.join(" ")
+    end
   end
 
   test "build dockerfile" do
@@ -112,10 +115,13 @@ class CommandsBuilderTest < ActiveSupport::TestCase
   end
 
   test "native push with build secrets" do
-    builder = new_builder_command(builder: { "multiarch" => false, "secrets" => [ "a", "b" ] })
-    assert_equal \
-      "docker build -t dhh/app:123 -t dhh/app:latest --label service=\"app\" --secret id=\"a\" --secret id=\"b\" --file Dockerfile . && docker push dhh/app:123 && docker push dhh/app:latest",
-      builder.push.join(" ")
+    with_test_secrets("secrets" => "a=foo\nb=bar") do
+      FileUtils.touch("Dockerfile")
+      builder = new_builder_command(builder: { "multiarch" => false, "secrets" => [ "a", "b" ] })
+      assert_equal \
+        "docker build -t dhh/app:123 -t dhh/app:latest --label service=\"app\" --secret id=\"a\" --secret id=\"b\" --file Dockerfile . && docker push dhh/app:123 && docker push dhh/app:latest",
+        builder.push.join(" ")
+    end
   end
 
   test "build with ssh agent socket" do

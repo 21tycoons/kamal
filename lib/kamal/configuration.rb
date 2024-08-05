@@ -56,7 +56,7 @@ class Kamal::Configuration
     @accessories = @raw_config.accessories&.keys&.collect { |name| Accessory.new(name, config: self) } || []
     @boot = Boot.new(config: self)
     @builder = Builder.new(config: self)
-    @env = Env.new(config: @raw_config.env || {})
+    @env = Env.new(config: @raw_config.env || {}, secrets: secrets)
 
     @healthcheck = Healthcheck.new(healthcheck_config: @raw_config.healthcheck)
     @logging = Logging.new(logging_config: @raw_config.logging)
@@ -223,7 +223,7 @@ class Kamal::Configuration
 
   def env_tags
     @env_tags ||= if (tags = raw_config.env["tags"])
-      tags.collect { |name, config| Env::Tag.new(name, config: config) }
+      tags.collect { |name, config| Env::Tag.new(name, config: config, secrets: secrets) }
     else
       []
     end
@@ -251,6 +251,10 @@ class Kamal::Configuration
       logging: logging_args,
       healthcheck: healthcheck.to_h
     }.compact
+  end
+
+  def secrets
+    @secrets ||= Secrets.new(destination: destination)
   end
 
   private

@@ -116,13 +116,15 @@ class ConfigurationBuilderTest < ActiveSupport::TestCase
   end
 
   test "secrets" do
-    assert_equal [], config.builder.secrets
+    assert_equal({}, config.builder.secrets)
   end
 
   test "setting secrets" do
-    @deploy_with_builder_option[:builder] = { "secrets" => [ "GITHUB_TOKEN" ] }
+    with_test_secrets("secrets" => "GITHUB_TOKEN=secret123") do
+      @deploy_with_builder_option[:builder] = { "secrets" => [ "GITHUB_TOKEN" ] }
 
-    assert_equal [ "GITHUB_TOKEN" ], config_with_builder_option.builder.secrets
+      assert_equal({ "GITHUB_TOKEN" => "secret123" }, config_with_builder_option.builder.secrets)
+    end
   end
 
   test "dockerfile" do
